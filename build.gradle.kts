@@ -1,40 +1,32 @@
 @file:Suppress("PropertyName", "VariableNaming")
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.fabric.loom)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlinx.serialization)
-    alias(libs.plugins.iridium)
-    alias(libs.plugins.iridium.publish)
-    alias(libs.plugins.iridium.upload)
 }
 
 group = property("maven_group")!!
 version = property("mod_version")!!
 base.archivesName.set(property("archives_base_name") as String)
-description = property("description") as String
 
 val modid: String by project
 val mod_name: String by project
-val modrinth_id: String? by project
-val curse_id: String? by project
 
 repositories {
-    maven("https://teamvoided.org/releases")
     mavenCentral()
 }
 
-
-modSettings {
-    modId(modid)
-    modName(mod_name)
-
-    entrypoint("main", "com.theendercore.trowel.TrowelMod")
-}
-
 dependencies {
+    minecraft("com.mojang:minecraft:${libs.versions.minecraft.get()}")
+    mappings("net.fabricmc:yarn:${libs.versions.yarn.get()}:v2")
+    modImplementation("net.fabricmc:fabric-loader:${libs.versions.fabric.loader.get()}")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${libs.versions.fabric.api.get()}")
+    modImplementation("net.fabricmc:fabric-language-kotlin:${libs.versions.fabric.language.kotlin.get()}")
+
     modImplementation(fileTree("libs"))
 }
 
@@ -50,32 +42,34 @@ loom {
 }
 
 tasks {
-    val targetJavaVersion = 17
+    val targetJavaVersion = 21
+
     withType<JavaCompile> {
         options.encoding = "UTF-8"
         options.release.set(targetJavaVersion)
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = targetJavaVersion.toString()
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
     }
 
     java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(JavaVersion.toVersion(targetJavaVersion).toString()))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(targetJavaVersion))
         withSourcesJar()
     }
-}
 
-uploadConfig {
-//    debugMode = true
-    modrinthId = modrinth_id
-    curseId = curse_id
+    processResources {
+        inputs.property("version", project.version)
+        filesMatching("fabric.mod.json") {
+            expand("version" to project.version)
+        }
+    }
 
-    changeLog = "- fixed bug with rechisel\n- update to 20.6"
-    // FabricApi
-    modrinthDependency("P7dR8mSH", uploadConfig.REQUIRED)
-    curseDependency("fabric-api", uploadConfig.REQUIRED)
-    // Fabric Language Kotlin
-    modrinthDependency("Ha28R6CL", uploadConfig.REQUIRED)
-    curseDependency("fabric-language-kotlin", uploadConfig.REQUIRED)
+    jar {
+        from("LICENSE") {
+            rename { "${it}_${base.archivesName.get()}" }
+        }
+    }
 }
