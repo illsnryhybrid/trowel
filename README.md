@@ -1,16 +1,26 @@
 # Trowel
-This mod is a simple port of the Quark mods Trowel item. Its been written from scratch by me. I just borrowed the original idea from Quark.
+
+A Minecraft mod that adds a trowel item for randomly placing blocks from your hotbar.
+
+## About This Fork
+
+This is a fork of [theendercore/Trowel](https://github.com/theendercore/Trowel) that I maintain to keep the mod working with newer Minecraft versions as I play. The original mod was created by theendercore—I'm just keeping it alive for my own use.
+
+While this isn't a passion project, contributions are welcome! If you'd like to submit a fix or improvement, feel free to open a PR.
+
+## Features
+
+When right-clicked, the trowel picks a random block from your hotbar and places it. Great for adding natural variation to builds.
+
+**Crafting:** 1 stick + 2 iron ingots
 
 ## Dependencies
-This mod Depends on [Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
-*(I'm sorry for dependency)*
 
-## Features 
-When right clicked it picks a random block from your hotbar and places is down. *(For a visual demonstration go to the images tab)* </br>To craft the trowel you need 1 stick and 2 ingots. 
+Requires [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
 
+## Credits
 
-*PS. Thanks Astra for icon art*
-
-Thank you unroman for Ukrainian translation!
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M7DWJCH)
+- Original mod by [theendercore](https://github.com/theendercore/Trowel)
+- Mod concept inspired by [Quark](https://quarkmod.net/)
+- Icon art by Astra
+- Ukrainian translation by unroman
