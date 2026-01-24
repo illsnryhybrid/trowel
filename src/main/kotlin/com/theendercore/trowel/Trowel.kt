@@ -8,7 +8,7 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.util.ActionResult
 import net.minecraft.util.hit.BlockHitResult
 
-class Trowel : Item(Settings().maxCount(1)) {
+class Trowel(settings: Settings) : Item(settings) {
     override fun useOnBlock(c: ItemUsageContext): ActionResult {
         if (c.world.isClient) return ActionResult.PASS
 
@@ -70,6 +70,6 @@ class Trowel : Item(Settings().maxCount(1)) {
         return ctx.canPlace()
                 && state.canPlaceAt(ctx.world, ctx.blockPos)
                 && ctx.world.canPlace(state, ctx.blockPos, shapeContext)
-                && stack.useOnBlock(ctx).shouldIncrementStat()
+                && stack.useOnBlock(ctx).isAccepted
     }
 }
