@@ -44,3 +44,5 @@ bin/
 /run/
 .env
 CLAUDE.md
+.claude/
+docs/superpowers/
