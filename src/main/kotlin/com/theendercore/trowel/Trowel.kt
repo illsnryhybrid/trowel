@@ -10,7 +10,7 @@ import net.minecraft.util.hit.BlockHitResult
 
 class Trowel(settings: Settings) : Item(settings) {
     override fun useOnBlock(c: ItemUsageContext): ActionResult {
-        if (c.world.isClient) return ActionResult.PASS
+        if (c.world.isClient) return ActionResult.SUCCESS
 
         val player = c.player ?: return ActionResult.PASS
         val inv = player.inventory ?: return ActionResult.PASS
