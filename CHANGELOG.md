@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.5.0]
+## [1.5.0] - Unreleased
 ### Changed
 - Ported to Minecraft 26.1.2.
 
