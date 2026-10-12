@@ -1,38 +1,43 @@
 package com.theendercore.trowel
 
-import net.minecraft.block.ShapeContext
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.entity.player.PlayerInventory
-import net.minecraft.item.*
-import net.minecraft.sound.SoundCategory
-import net.minecraft.util.ActionResult
-import net.minecraft.util.hit.BlockHitResult
+import net.minecraft.sounds.SoundSource
+import net.minecraft.world.InteractionResult
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.AirItem
+import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.item.context.UseOnContext
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.shapes.CollisionContext
 
-class Trowel(settings: Settings) : Item(settings) {
-    override fun useOnBlock(c: ItemUsageContext): ActionResult {
-        if (c.world.isClient) return ActionResult.SUCCESS
+class Trowel(properties: Properties) : Item(properties) {
+    override fun useOn(c: UseOnContext): InteractionResult {
+        if (c.level.isClientSide) return InteractionResult.SUCCESS
 
-        val player = c.player ?: return ActionResult.PASS
-        val inv = player.inventory ?: return ActionResult.PASS
+        val player = c.player ?: return InteractionResult.PASS
+        val inv = player.inventory ?: return InteractionResult.PASS
 
         val placeable = (0..8).mapNotNull {
-            val stack = inv.getStack(it)
+            val stack = inv.getItem(it)
             if (isPlaceable(stack) && stack != null) (it to stack)
             else null
         }
 
-        if (placeable.isEmpty()) return ActionResult.PASS
+        if (placeable.isEmpty()) return InteractionResult.PASS
         return place(placeable, inv, player, c, player.inventory.selectedSlot)
     }
 
 
     private fun place(
-        placeable: List<Pair<Int, ItemStack>>, inv: PlayerInventory,
-        player: PlayerEntity, c: ItemUsageContext, originalSlot: Int,
-    ): ActionResult {
+        placeable: List<Pair<Int, ItemStack>>, inv: Inventory,
+        player: Player, c: UseOnContext, originalSlot: Int,
+    ): InteractionResult {
         if (placeable.isEmpty()) {
             inv.selectedSlot = originalSlot
-            return ActionResult.FAIL
+            return InteractionResult.FAIL
         }
         placeable.random().let { (slot, stack) ->
             inv.selectedSlot = slot
@@ -40,36 +45,37 @@ class Trowel(settings: Settings) : Item(settings) {
             if (canPlace(placeCtx, stack.item as BlockItem)) {
                 placeSound(placeCtx)
                 inv.selectedSlot = originalSlot
-                return ActionResult.SUCCESS
+                return InteractionResult.SUCCESS
             }
             return this.place(placeable.filter { it.first != slot }, inv, player, c, originalSlot)
         }
     }
 
-    private fun placeSound(c: ItemUsageContext) {
-        c.world.getBlockState(c.blockPos).let {
-            c.world.playSound(
-                null, c.blockPos, it.soundGroup.placeSound,
-                SoundCategory.BLOCKS,
-                (it.soundGroup.getVolume() + 1.0f) / 2.0f,
-                it.soundGroup.getPitch() * 0.8f
+    private fun placeSound(c: UseOnContext) {
+        c.level.getBlockState(c.clickedPos).let {
+            c.level.playSound(
+                null, c.clickedPos, it.soundType.placeSound,
+                SoundSource.BLOCKS,
+                (it.soundType.volume + 1.0f) / 2.0f,
+                it.soundType.pitch * 0.8f
             )
         }
     }
 
-    private fun newPlacementContext(player: PlayerEntity, stack: ItemStack, context: ItemUsageContext) =
-        ItemPlacementContext(
+    private fun newPlacementContext(player: Player, stack: ItemStack, context: UseOnContext) =
+        BlockPlaceContext(
             player, context.hand, stack,
-            BlockHitResult(context.hitPos, context.side, context.blockPos, context.hitsInsideBlock())
+            BlockHitResult(context.clickLocation, context.clickedFace, context.clickedPos, context.isInside)
         )
 
-    private fun isPlaceable(stack: ItemStack): Boolean = stack.item !is AirBlockItem && stack.item is BlockItem
-    private fun canPlace(ctx: ItemPlacementContext, stack: BlockItem): Boolean {
-        val state = stack.block.getPlacementState(stack.getPlacementContext(ctx)) ?: return false
-        val shapeContext = if (ctx.player == null) ShapeContext.absent() else ShapeContext.of(ctx.player)
+    private fun isPlaceable(stack: ItemStack): Boolean = stack.item !is AirItem && stack.item is BlockItem
+    private fun canPlace(ctx: BlockPlaceContext, stack: BlockItem): Boolean {
+        val state = stack.block.getStateForPlacement(stack.updatePlacementContext(ctx) ?: return false)
+            ?: return false
+        val shapeContext = ctx.player?.let(CollisionContext::of) ?: CollisionContext.empty()
         return ctx.canPlace()
-                && state.canPlaceAt(ctx.world, ctx.blockPos)
-                && ctx.world.canPlace(state, ctx.blockPos, shapeContext)
-                && stack.useOnBlock(ctx).isAccepted
+                && state.canSurvive(ctx.level, ctx.clickedPos)
+                && ctx.level.isUnobstructed(state, ctx.clickedPos, shapeContext)
+                && stack.useOn(ctx).consumesAction()
     }
 }
