@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.5.1] - 2026-10-12
+## [1.5.1] - UNRELEASED
 ### Changed
 - Ported to Minecraft 26.2.
 
