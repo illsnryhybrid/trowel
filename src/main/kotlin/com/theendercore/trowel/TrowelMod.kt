@@ -1,16 +1,16 @@
 package com.theendercore.trowel
 
 import net.fabricmc.api.ModInitializer
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents.ModifyEntries
-import net.minecraft.item.Item
-import net.minecraft.item.ItemGroups
-import net.minecraft.item.Items
-import net.minecraft.registry.Registries
-import net.minecraft.registry.Registry
-import net.minecraft.registry.RegistryKey
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.util.Identifier
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents.ModifyOutput
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
+import net.minecraft.resources.Identifier
+import net.minecraft.resources.ResourceKey
+import net.minecraft.world.item.CreativeModeTabs
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.Items
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -19,16 +19,16 @@ object TrowelMod : ModInitializer {
     const val MODID = "trowel"
     val log: Logger = LoggerFactory.getLogger(MODID)
 
-    private val TROWEL_ID: Identifier = Identifier.of(MODID, MODID)
-    private val TROWEL_KEY: RegistryKey<Item> = RegistryKey.of(RegistryKeys.ITEM, TROWEL_ID)
-    val TROWEL: Item = Trowel(Item.Settings().registryKey(TROWEL_KEY).maxCount(1))
+    private val TROWEL_ID: Identifier = Identifier.fromNamespaceAndPath(MODID, MODID)
+    private val TROWEL_KEY: ResourceKey<Item> = ResourceKey.create(Registries.ITEM, TROWEL_ID)
+    val TROWEL: Item = Trowel(Item.Properties().setId(TROWEL_KEY).stacksTo(1))
 
     override fun onInitialize() {
         log.info("Seizing the means of block placement!")
 
-        Registry.register(Registries.ITEM, TROWEL_KEY, TROWEL)
+        Registry.register(BuiltInRegistries.ITEM, TROWEL_KEY, TROWEL)
 
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS)
-            .register(ModifyEntries { it.addAfter(Items.SHEARS, TROWEL) })
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES)
+            .register(ModifyOutput { it.insertAfter(Items.SHEARS, TROWEL) })
     }
 }

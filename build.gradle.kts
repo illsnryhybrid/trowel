@@ -22,12 +22,9 @@ repositories {
 
 dependencies {
     minecraft("com.mojang:minecraft:${libs.versions.minecraft.get()}")
-    mappings("net.fabricmc:yarn:${libs.versions.yarn.get()}:v2")
-    modImplementation("net.fabricmc:fabric-loader:${libs.versions.fabric.loader.get()}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${libs.versions.fabric.api.get()}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:${libs.versions.fabric.language.kotlin.get()}")
-
-    modImplementation(fileTree("libs"))
+    implementation("net.fabricmc:fabric-loader:${libs.versions.fabric.loader.get()}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${libs.versions.fabric.api.get()}")
+    implementation("net.fabricmc:fabric-language-kotlin:${libs.versions.fabric.language.kotlin.get()}")
 }
 
 loom {
@@ -42,7 +39,7 @@ loom {
 }
 
 tasks {
-    val targetJavaVersion = 21
+    val targetJavaVersion = 25
 
     withType<JavaCompile> {
         options.encoding = "UTF-8"
@@ -51,7 +48,7 @@ tasks {
 
     withType<KotlinCompile> {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
 
